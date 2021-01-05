@@ -1,0 +1,272 @@
+1. Identify procedures performed for patient Connie Lingus’s visit Last month.
+   Display the patient name, procedure name, date of procedure and procedure cost. 
+
+SELECT PATIENTFIRST,PATIENTLAST,PROCEDURENAME,PROCEDUREDATE,BILL
+FROM PATIENTS,VISITS,PROCEDURES
+WHERE PATIENTFIRST='CONNIE'
+AND PATIENTLAST='LINGUS'
+AND PATIENTS.PATIENTID=VISITS.PATIENTID
+AND VISITS.VISITID=PROCEDURES.VISITID;
+
+PATIENTFIRST	PATIENTLAST	PROCEDURENAME	PROCEDUREDATE	BILL
+CONNIE		LINGUS		VACCINE		05-OCT-18	21.22
+CONNIE		LINGUS		VACCINE		29-NOV-19	21.55
+
+2. Identify patients that have never received the hepatitis B vaccine. 
+   Display the patient name age, date of birth and address.  Order the output alphabetically by patient name. 
+
+SELECT PATIENTFIRST,PATIENTLAST,AGE,DOB,STREET,CITY,ZIPCODE
+FROM PATIENTS,ADDRESS,VISITS,PROCEDURES
+WHERE PROCEDURENAME='HEPATITIS B VACCINE'
+AND PATIENTS.PATIENTID=ADDRESS.PATIENTID
+AND PATIENTS.PATIENTID=VISITS.PATIENTID
+AND VISITS.VISITID=PROCEDURES.VISITID;
+
+PATIENTFIRST	PATIENTLAST	AGE	DOB		STREET			CITY		ZIPCODE
+ANITA		PEA		23	16-MAY-96	61 HARTFORD LANE	NEWYORK		10032
+EMMA		STONE		26	03-AUG-93	7988 ROCKCREST AVE.	FOREST HILLS	11375
+
+3. Identify the procedures performed by a Doctor last month.
+   Display the procedure name, procedure date and patient name.  
+
+SELECT PROCEDURENAME,PROCEDUREDATE,PATIENTFIRST,PATIENTLAST
+FROM PATIENTS,VISITS,PROCEDURES,STAFF
+WHERE TITLE='DOCTOR'
+AND STAFF.STAFFID=PROCEDURES.STAFFID
+AND PATIENTS.PATIENTID=VISITS.PATIENTID
+AND VISITS.VISITID=PROCEDURES.VISITID
+AND PROCEDUREDATE>=TO_DATE('2019-10-18','YYYY-MM-DD');
+
+PROCEDURENAME	PROCEDUREDATE	PATIENTFIRST	PATIENTLAST
+ULTRASOUND	30-NOV-19	HARRY		PETERS
+VACCINE		29-NOV-19	CONNIE		LINGUS
+ULTRASOUND	15-NOV-19	HARRY		PETERS
+
+4. Identify patients with an abnormal cell formation 3 months ago.
+   Display the patient name, procedure name and procedure result.  
+
+SELECT PATIENTFIRST,PATIENTLAST,PROCEDURENAME,RESULTS
+FROM PATIENTS,VISITS,PROCEDURES,DIAGNOSIS
+WHERE DIAGNOSISNAME='TUMOR'
+AND VISITS.VISITID=DIAGNOSIS.VISITID
+AND PATIENTS.PATIENTID=VISITS.PATIENTID
+AND VISITS.VISITID=PROCEDURES.VISITID
+AND PROCEDUREDATE>=TO_DATE('2019-08-18','YYYY-MM-DD');
+
+PATIENTFIRST	PATIENTLAST	PROCEDURENAME	RESULTS
+COLIN		REEDS		X-RAY		CANCER CELLS FOUND
+COLIN		REEDS		CHEMOTHERAPY	CANCER STILL THERE
+
+5. Identify patients who were diagnosed with cancer in the 5 months and are being treated with chemotherapy. 
+   Display the patient name and procedure.  Display the output alphabetically by patient name. 
+
+SELECT PATIENTFIRST,PATIENTLAST,PROCEDURENAME
+FROM PATIENTS,VISITS,PROCEDURES,DIAGNOSIS
+WHERE DIAGNOSISNAME='CANCER'AND PROCEDURENAME='CHEMOTHERAPY'
+AND VISITS.VISITID=DIAGNOSIS.VISITID
+AND PATIENTS.PATIENTID=VISITS.PATIENTID
+AND VISITS.VISITID=PROCEDURES.VISITID
+AND PROCEDUREDATE>=TO_DATE('2019-06-18','YYYY-MM-DD')
+ORDER BY 1 ASC;
+
+PATIENTFIRST	PATIENTLAST	PROCEDURENAME
+COLIN		REEDS		CHEMOTHERAPY
+GABE		NEWELL		CHEMOTHERAPY
+
+6. Identify staff who have not performed any procedures in the last year. 
+   Display the staff name.  Display the output alphabetically by staff name. 
+
+SELECT STAFFFIRST,STAFFLAST
+FROM STAFF
+WHERE STAFFID NOT IN
+    (SELECT STAFFID
+    FROM PROCEDURES
+    WHERE PROCEDUREDATE>=TO_DATE('2018-11-18','YYYY-MM-DD'))
+    ORDER BY 1 ASC;
+
+STAFFFIRST	STAFFLAST
+JON		SMITH
+KEVIN		BROWN
+PHIL		JACKSON
+SHARON		HERNANDEZ
+
+7. Identify patients who have not visited with medical staff in the last 2 years. 
+   Display the patient name and email.  Display the output alphabetically by patient name. 
+
+SELECT PATIENTFIRST,PATIENTLAST,EMAIL
+FROM PATIENTS
+WHERE PATIENTID NOT IN
+    (SELECT PATIENTID
+    FROM VISITS
+    WHERE VISITDATE>=TO_DATE('2017-11-18','YYYY-MM-DD'))
+    ORDER BY 1 ASC;
+
+PATIENTFIRST	PATIENTLAST	EMAIL
+ANITA		PEA		ANITAPEA@GMAIL.COM
+BEN		DOVER		BENDOVER69@GMAIL.COM
+FAUX		SEIKH		FAUXSEIKH@GMAIL.COM
+JENNY		TIELS		JENNYTIELS@GMAIL.COM
+
+
+8. Identify the number of procedures performed in the last 2 years. 
+   Display at least three columns: office location, procedure name and number of procedures.  
+   Display one row for each distinct office and procedure name.  
+   Display the output alphabetically by office location and procedure. 
+
+SELECT OFFICE.ROOMNUM,PROCEDURENAME,COUNT(*)"NUMBER OF PROCEDURES"
+FROM OFFICE,PROCEDURES
+WHERE OFFICE.ROOMNUM=PROCEDURES.ROOMNUM
+AND PROCEDUREDATE>=TO_DATE('2017-11-18','YYYY-MM-DD')
+GROUP BY OFFICE.ROOMNUM,PROCEDURENAME
+ORDER BY 2 ASC;
+
+ROOMNUM	PROCEDURENAME		NUMBER OF PROCEDURES
+103	CHEMOTHERAPY			1
+105	CHEMOTHERAPY			1
+104	HAPATITIS B VACCINE		1
+103	ULTRASOUND			2
+103	VACCINE				6
+104	VACCINE				8
+103	X-RAY				1
+
+9. Identify the number of patients who had procedures in the last year. 
+   Display four columns: patient first and last name, number of procedures and total cost.  
+   Display one row for each distinct patient name. Display the output alphabetically by patient name. 
+
+SELECT PATIENTFIRST,PATIENTLAST,COUNT(*)"NUMBER OF PROCEDURES",SUM(BILL)"BILL"
+FROM PATIENTS,VISITS,PROCEDURES
+WHERE PATIENTS.PATIENTID=VISITS.PATIENTID
+AND VISITS.VISITID=PROCEDURES.VISITID
+AND PROCEDUREDATE>=TO_DATE('2018-11-18','YYYY-MM-DD')
+GROUP BY PATIENTFIRST,PATIENTLAST
+ORDER BY 1 ASC;
+
+PATIENTFIRST	PATIENTLAST	NUMBER OF PROCEDURES	BILL
+COLIN		REEDS			3		13021.24
+CONNIE		LINGUS			1		21.55
+EMMA		STONE			2		54.09
+ERIC		SHUN			1		21.3
+GABE		NEWELL			3		6542.25
+HARRY		PETERS			2		600.8
+JACK		HUGHMAN			1		21.55
+LOU		SANUS			1		21.3
+
+10. Identify the number of procedures performed at each office in the last year. 
+    Display at least two columns: office location and number of procedures.  
+    Display the output alphabetically by office location.
+
+SELECT OFFICE.ROOMNUM,COUNT(*)"NUMBER OF PROCEDURES"
+FROM OFFICE,PROCEDURES
+WHERE OFFICE.ROOMNUM=PROCEDURES.ROOMNUM
+AND PROCEDUREDATE>=TO_DATE('2018-11-18','YYYY-MM-DD')
+GROUP BY OFFICE.ROOMNUM
+ORDER BY 1 ASC;
+
+ROOMNUM	NUMBER OF PROCEDURES
+103		8
+104		5
+105		1
+ 
+11. Identify the revenue generated by each procedure in the last 2 years. 
+    Display three columns: procedure name, number of procedures and total revenue/cost.  
+    Display one row for each distinct patient name.   
+    Display the output alphabetically by procedure name. 
+
+SELECT PROCEDURENAME,COUNT(*)"NUMBER OF PROCEDURES",SUM(BILL)"TOTAL REVENUE"
+FROM PATIENTS,VISITS,PROCEDURES
+WHERE PATIENTS.PATIENTID=VISITS.PATIENTID
+AND VISITS.VISITID=PROCEDURES.VISITID
+AND PROCEDUREDATE>=TO_DATE('2017-11-18','YYYY-MM-DD')
+GROUP BY PROCEDURENAME
+ORDER BY 1 ASC;
+
+PROCEDURENAME		NUMBER OF PROCEDURES	TOTAL REVENUE
+CHEMOTHERAPY			2		13000
+HEPATITIS B VACCINE		1		32.89
+ULTRASOUND			2		600.8
+VACCINE				14		297.89
+X-RAY				1		6500
+
+12. Display the structure of ALL tables using SQL Describe. 
+
+PATIENTS
+Name         	Null?    	Type         
+------------ 	-------- 	------------ 
+PATIENTID	NOT NULL 	NUMBER       
+PATIENTFIRST 	NOT NULL 	VARCHAR2(30) 
+PATIENTLAST  	NOT NULL 	VARCHAR2(30) 
+DOB          	NOT NULL 	DATE         
+AGE          	NOT NULL 	NUMBER       
+GENDER       	NOT NULL 	CHAR(1)      
+PHONE                 		CHAR(10)     
+EMAIL                 		VARCHAR2(35)
+
+ADDRESS
+Name     	 Null?    	Type         
+--------- 	-------- 	------------ 
+ADDRESSID 	NOT NULL 	NUMBER       
+PATIENTID 	NOT NULL 	NUMBER       
+STREET    	NOT NULL 	VARCHAR2(40) 
+CITY      	NOT NULL 	VARCHAR2(30) 
+ZIPCODE   	NOT NULL 	CHAR(5) 
+
+STAFF
+Name       	Null?    	Type         
+---------- 	-------- 	------------ 
+STAFFID    	NOT NULL 	NUMBER       
+STAFFFIRST 	NOT NULL 	VARCHAR2(30) 
+STAFFLAST  	NOT NULL 	VARCHAR2(30) 
+TITLE      	NOT NULL 	VARCHAR2(30) 
+VISITS
+Name      	Null?    	Type   
+--------- 	-------- 	------ 
+VISITID   	NOT NULL 	NUMBER 
+PATIENTID 	NOT NULL 	NUMBER 
+STAFFID   	NOT NULL 	NUMBER 
+ROOMNUM   	NOT NULL 	NUMBER 
+VISITDATE 	NOT NULL 	DATE  
+
+OFFICE
+Name    	Null?    	Type   
+------- 	-------- 	------ 
+ROOMNUM 	NOT NULL 	NUMBER  
+ 
+PROCEDURES   
+Name          	Null?    	Type         
+------------- 	-------- 	------------ 
+PROCEDUREID   	NOT NULL 	NUMBER       
+VISITID       	NOT NULL 	NUMBER       
+PROCEDURENAME 	NOT NULL 	VARCHAR2(30) 
+PROCEDUREDATE 	NOT NULL 	DATE         
+RESULTS       	NOT NULL 	VARCHAR2(30) 
+STAFFID       	NOT NULL 	NUMBER       
+BILL          	NOT NULL 	NUMBER(10,2) 
+ROOMNUM       	NOT NULL 	NUMBER       
+ 
+DIAGNOSIS
+Name          	Null?    	Type         
+------------- 	-------- 	------------ 
+DIAGNOSISID   	NOT NULL 	NUMBER       
+VISITID       	NOT NULL 	NUMBER       
+PROCEDUREID            		NUMBER       
+DIAGNOSISNAME 	NOT NULL 	VARCHAR2(30) 
+DIAGNOSISDATE 	NOT NULL 	DATE         
+STAFFID       	NOT NULL 	NUMBER       
+ROOMNUM       	NOT NULL 	NUMBER       
+
+ALLERGIES
+Name        	Null?    	Type         
+----------- 	-------- 	------------ 
+ALLERGYID   	NOT NULL 	NUMBER       
+DIAGNOSISID 	NOT NULL 	NUMBER       
+ALLERGYTO   	NOT NULL 	VARCHAR2(30)
+
+MEDICATION
+Name           	Null?    	Type         
+-------------- 	-------- 	------------ 
+MEDICATIONID   	NOT NULL 	NUMBER       
+DIAGNOSISID    	NOT NULL 	NUMBER       
+MEDICATIONNAME 	NOT NULL 	VARCHAR2(30) 
+DOSAGE         	NOT NULL 	CHAR(6)      
+STARTDATE      	NOT NULL 	DATE         
+ENDDATE        	NOT NULL 	DATE  

@@ -1,1 +1,0 @@
-delete HR.job_history
